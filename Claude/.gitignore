@@ -1,0 +1,12 @@
+# Ignore everything on the Desktop (parent directory files show as ../ in git)
+# Only track the claude-chief-of-staff directory contents
+
+# Exclude nested git repos (submodules handled separately)
+claude-chief-of-staff/.git/
+
+# Common clutter
+*.lnk
+desktop.ini
+~$*
+Thumbs.db
+.DS_Store
