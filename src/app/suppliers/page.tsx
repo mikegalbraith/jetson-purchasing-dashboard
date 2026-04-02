@@ -1,7 +1,23 @@
 import StatusBadge from '@/components/StatusBadge'
-import { sampleSuppliers } from '@/lib/sample-data'
+import { prisma } from '@/lib/prisma'
+import { dbToUi } from '@/lib/status'
 
-export default function SuppliersPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function SuppliersPage() {
+  const suppliers = await prisma.supplier.findMany({
+    include: {
+      _count: {
+        select: {
+          purchaseOrders: {
+            where: { status: { notIn: ['received', 'cancelled'] } },
+          },
+        },
+      },
+    },
+    orderBy: { name: 'asc' },
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -15,14 +31,14 @@ export default function SuppliersPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {sampleSuppliers.map((s) => (
+        {suppliers.map((s) => (
           <div key={s.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-3">
               <div>
                 <h3 className="font-semibold">{s.name}</h3>
                 <p className="text-xs text-gray-500">{s.category}</p>
               </div>
-              <StatusBadge status={s.status} />
+              <StatusBadge status={dbToUi(s.status)} />
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
@@ -35,7 +51,7 @@ export default function SuppliersPage() {
               </div>
               <div>
                 <p className="text-gray-500 text-xs">Active POs</p>
-                <p className="font-medium">{s.activePOs}</p>
+                <p className="font-medium">{s._count.purchaseOrders}</p>
               </div>
               <div>
                 <p className="text-gray-500 text-xs">Rating</p>

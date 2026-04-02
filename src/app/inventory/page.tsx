@@ -1,7 +1,15 @@
 import StatusBadge from '@/components/StatusBadge'
-import { sampleInventory } from '@/lib/sample-data'
+import { prisma } from '@/lib/prisma'
+import { dbToUi } from '@/lib/status'
 
-export default function InventoryPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function InventoryPage() {
+  const items = await prisma.inventoryItem.findMany({
+    include: { supplier: true },
+    orderBy: { name: 'asc' },
+  })
+
   return (
     <div className="space-y-6">
       <div>
@@ -23,12 +31,12 @@ export default function InventoryPage() {
             </tr>
           </thead>
           <tbody>
-            {sampleInventory.map((item) => (
+            {items.map((item) => (
               <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td className="px-5 py-3 font-mono text-xs">{item.sku}</td>
                 <td className="px-5 py-3 font-medium">{item.name}</td>
-                <td className="px-5 py-3 text-gray-600">{item.supplier}</td>
-                <td className="px-5 py-3"><StatusBadge status={item.status} /></td>
+                <td className="px-5 py-3 text-gray-600">{item.supplier.name}</td>
+                <td className="px-5 py-3"><StatusBadge status={dbToUi(item.status)} /></td>
                 <td className={`px-5 py-3 text-right font-medium ${item.quantityOnHand <= item.reorderPoint ? 'text-red-600' : ''}`}>
                   {item.quantityOnHand}
                 </td>

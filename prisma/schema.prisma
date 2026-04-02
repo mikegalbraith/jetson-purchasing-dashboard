@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum POStatus {
+  draft
+  submitted
+  approved
+  received
+  cancelled
+}
+
+enum SupplierStatus {
+  active
+  inactive
+  onboarding
+}
+
+enum InventoryStatus {
+  in_stock
+  low_stock
+  out_of_stock
+  on_order
+}
+
+enum Currency {
+  CAD
+  USD
+}
+
+model Supplier {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  category      String
+  contactEmail  String
+  leadTimeDays  Int
+  rating        Float          @default(0)
+  totalSpendCAD Float          @default(0)
+  status        SupplierStatus @default(active)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  purchaseOrders PurchaseOrder[]
+  inventoryItems InventoryItem[]
+}
+
+model PurchaseOrder {
+  id               String   @id @default(cuid())
+  poNumber         String   @unique
+  supplierId       String
+  supplier         Supplier @relation(fields: [supplierId], references: [id])
+  status           POStatus @default(draft)
+  items            Int
+  totalCAD         Float    @default(0)
+  totalUSD         Float    @default(0)
+  currency         Currency
+  createdAt        DateTime @default(now())
+  expectedDelivery DateTime
+  updatedAt        DateTime @updatedAt
+}
+
+model InventoryItem {
+  id             String          @id @default(cuid())
+  sku            String          @unique
+  name           String
+  category       String
+  supplierId     String
+  supplier       Supplier        @relation(fields: [supplierId], references: [id])
+  quantityOnHand Int             @default(0)
+  reorderPoint   Int             @default(0)
+  unitCostCAD    Float
+  location       String
+  status         InventoryStatus @default(in_stock)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model MonthlySpend {
+  id    String @id @default(cuid())
+  month String
+  year  Int
+  CAD   Float  @default(0)
+  USD   Float  @default(0)
+
+  @@unique([month, year])
+}

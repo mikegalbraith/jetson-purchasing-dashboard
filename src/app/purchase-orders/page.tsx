@@ -1,7 +1,15 @@
 import StatusBadge from '@/components/StatusBadge'
-import { samplePOs } from '@/lib/sample-data'
+import { prisma } from '@/lib/prisma'
+import { dbToUi } from '@/lib/status'
 
-export default function PurchaseOrdersPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function PurchaseOrdersPage() {
+  const pos = await prisma.purchaseOrder.findMany({
+    include: { supplier: true },
+    orderBy: { createdAt: 'desc' },
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -27,16 +35,16 @@ export default function PurchaseOrdersPage() {
             </tr>
           </thead>
           <tbody>
-            {samplePOs.map((po) => (
+            {pos.map((po) => (
               <tr key={po.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td className="px-5 py-3 font-medium">{po.poNumber}</td>
-                <td className="px-5 py-3 text-gray-600">{po.supplier}</td>
-                <td className="px-5 py-3"><StatusBadge status={po.status} /></td>
+                <td className="px-5 py-3 text-gray-600">{po.supplier.name}</td>
+                <td className="px-5 py-3"><StatusBadge status={dbToUi(po.status)} /></td>
                 <td className="px-5 py-3 text-right">{po.items}</td>
                 <td className="px-5 py-3 text-right font-medium">
                   ${(po.totalCAD || po.totalUSD).toLocaleString()} {po.currency}
                 </td>
-                <td className="px-5 py-3 text-gray-600">{po.expectedDelivery}</td>
+                <td className="px-5 py-3 text-gray-600">{po.expectedDelivery.toISOString().split('T')[0]}</td>
               </tr>
             ))}
           </tbody>
