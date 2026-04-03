@@ -1,14 +1,16 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
+import JetsonLogo from '@/components/JetsonLogo'
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-xl border border-gray-200 p-8 w-full max-w-sm text-center">
-        <div className="mb-6">
-          <h1 className="text-xl font-bold text-jetson-dark">Jetson Purchasing</h1>
-          <p className="text-sm text-gray-500 mt-1">Sign in with your Jetson account</p>
+    <div className="min-h-screen flex items-center justify-center bg-jetson-cream">
+      <div className="bg-white rounded-xl border border-gray-200 p-8 w-full max-w-sm text-center shadow-sm">
+        <div className="mb-6 flex flex-col items-center">
+          <JetsonLogo className="w-14 h-14 mb-3" />
+          <h1 className="text-xl font-bold text-jetson-dark">Jetson Home</h1>
+          <p className="text-sm text-gray-500 mt-1">Purchasing Dashboard</p>
         </div>
         <button
           onClick={() => signIn('google', { callbackUrl: '/' })}
