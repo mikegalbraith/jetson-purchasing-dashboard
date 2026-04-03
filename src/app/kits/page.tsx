@@ -48,6 +48,7 @@ function buildKitProducts(data: KitRow[]): KitProduct[] {
 export default function KitsPage() {
   const [search, setSearch] = useState('')
   const [kitType, setKitType] = useState('')
+  const [region, setRegion] = useState<'' | 'BC' | 'CO' | 'MA' | 'NY'>('')
   const [expanded, setExpanded] = useState<string | null>(null)
 
   const allProducts = useMemo(() => buildKitProducts(kits), [])
@@ -64,9 +65,11 @@ export default function KitsPage() {
             m['Item Name']?.toLowerCase().includes(search.toLowerCase())
         )
       const matchKit = !kitType || product.kitName === kitType
-      return matchSearch && matchKit
+      const productRegion = getRegion(product.name)
+      const matchRegion = !region || productRegion === region
+      return matchSearch && matchKit && matchRegion
     })
-  }, [search, kitType, allProducts])
+  }, [search, kitType, region, allProducts])
 
   const kitTypeCounts = useMemo(() => {
     const counts: Record<string, number> = {}
@@ -144,6 +147,31 @@ export default function KitsPage() {
               </option>
             ))}
           </select>
+          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+            <button
+              onClick={() => setRegion('')}
+              className={`px-3 py-2 text-sm font-medium transition-colors ${
+                region === ''
+                  ? 'bg-jetson-green text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              All
+            </button>
+            {(['BC', 'CO', 'MA', 'NY'] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRegion(r)}
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  region === r
+                    ? 'bg-jetson-green text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

@@ -100,7 +100,7 @@ function getRegionFlag(state: string): string {
 export default function ProductsPage() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
-  const [countryFilter, setCountryFilter] = useState('')
+  const [region, setRegion] = useState<'' | 'BC' | 'CO' | 'MA' | 'NY'>('')
 
   const allProducts = useMemo(() => buildProducts(), [])
   const types = [...new Set(allProducts.map((p) => p.type))].sort()
@@ -112,12 +112,12 @@ export default function ProductsPage() {
         product.label.toLowerCase().includes(search.toLowerCase()) ||
         product.asmItem.toLowerCase().includes(search.toLowerCase())
       const matchType = !typeFilter || product.type === typeFilter
-      const matchCountry =
-        !countryFilter ||
-        product.variants.some((v) => v.Country === countryFilter)
-      return matchSearch && matchType && matchCountry
+      const matchRegion =
+        !region ||
+        product.variants.some((v) => v['State/Province '] === region)
+      return matchSearch && matchType && matchRegion
     })
-  }, [search, typeFilter, countryFilter, allProducts])
+  }, [search, typeFilter, region, allProducts])
 
   return (
     <div className="space-y-6">
@@ -172,16 +172,31 @@ export default function ProductsPage() {
               <option key={t} value={t}>{t}</option>
             ))}
           </select>
-          <select
-            value={countryFilter}
-            onChange={(e) => setCountryFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-jetson-green/50"
-          >
-            <option value="">All Countries</option>
-            {countries.map((c) => (
-              <option key={c} value={c}>{c}</option>
+          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+            <button
+              onClick={() => setRegion('')}
+              className={`px-3 py-2 text-sm font-medium transition-colors ${
+                region === ''
+                  ? 'bg-jetson-green text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              All
+            </button>
+            {(['BC', 'CO', 'MA', 'NY'] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRegion(r)}
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  region === r
+                    ? 'bg-jetson-green text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {r}
+              </button>
             ))}
-          </select>
+          </div>
         </div>
       </div>
 
@@ -205,7 +220,7 @@ export default function ProductsPage() {
 
               <div className="space-y-2.5">
                 {product.variants
-                  .filter((v) => !countryFilter || v.Country === countryFilter)
+                  .filter((v) => !region || v['State/Province '] === region)
                   .map((variant) => (
                   <div
                     key={variant['Internal ID']}
