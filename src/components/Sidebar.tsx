@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 
 const nav = [
   { label: 'Overview', href: '/', icon: '📊' },
@@ -12,6 +13,9 @@ const nav = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
+
+  if (pathname === '/login') return null
 
   return (
     <aside className="w-64 bg-jetson-dark text-white flex flex-col shrink-0">
@@ -38,8 +42,28 @@ export default function Sidebar() {
           )
         })}
       </nav>
-      <div className="p-4 border-t border-white/10 text-xs text-gray-500">
-        Jetson Home Inc.
+      <div className="p-4 border-t border-white/10">
+        {session?.user && (
+          <div className="flex items-center gap-3">
+            {session.user.image && (
+              <img
+                src={session.user.image}
+                alt=""
+                className="w-8 h-8 rounded-full"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{session.user.name}</p>
+              <button
+                onClick={() => signOut()}
+                className="text-xs text-gray-400 hover:text-white transition-colors"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        )}
+        <p className="text-xs text-gray-500 mt-3">Jetson Home Inc.</p>
       </div>
     </aside>
   )
